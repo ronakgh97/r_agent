@@ -20,4 +20,6 @@ dirs = "6.0.0"
 serde = "1.0.228"
 serde_json = "1.0.148"
 atty = "0.2.14"
+toml = "0.9.8"
 my_lib = { path = "my_lib" }
+async-trait = "0.1.89"

@@ -22,8 +22,8 @@ pub enum Commands {
 
     /// Run the AI agent on a task
     Run {
-        /// The task prompt (primary input)
-        task: String,
+        /// The task prompt (primary input).
+        task: Option<String>,
 
         /// The agent's high-level plan/goal
         #[arg(short, long)]
