@@ -6,7 +6,7 @@ use crate::api::request::send_completion_request;
 use crate::api::request::send_request;
 use crate::api::request::send_request_stream;
 use crate::api::tools_registry::ToolRegistry;
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use futures_util::Stream;
 use serde::{Deserialize, Serialize};
 use std::pin::Pin;
@@ -135,12 +135,14 @@ pub async fn prompt(
     history: Vec<Message>,
 ) -> Result<(String, Option<Vec<ToolCall>>)> {
     // Add system prompt to the beginning of history for non-repetitive context
+
     let mut history = history;
     history.insert(
         0,
         Message {
             role: SYSTEM,
-            content: Option::from(agent.clone().system_prompt),
+            content: Some(agent.clone().system_prompt),
+            multi_content: None,
             tool_calls: None,
             tool_call_id: None,
             name: None,
@@ -180,7 +182,7 @@ pub async fn prompt(
     let tool_call = &response
         .choices
         .first()
-        .ok_or_else(|| anyhow::anyhow!("No choices in response"))?
+        .ok_or_else(|| anyhow!("No choices in response"))?
         .message
         .tool_calls;
 
@@ -192,13 +194,14 @@ pub async fn prompt_stream(
     history: Vec<Message>,
 ) -> Result<Pin<Box<dyn Stream<Item = Result<String>> + Send>>> {
     // Add system prompt to the beginning of history for non-repetitive context
-    let mut history = history;
 
+    let mut history = history;
     history.insert(
         0,
         Message {
             role: SYSTEM,
-            content: Option::from(agent.clone().system_prompt),
+            content: Some(agent.clone().system_prompt),
+            multi_content: None,
             tool_calls: None,
             tool_call_id: None,
             name: None,
@@ -241,7 +244,9 @@ pub async fn prompt_with_tools(agent: Agent, mut history: Vec<Message>) -> Resul
         None => return Err(anyhow::anyhow!("No tool registry")),
     };
 
-    loop {
+    const MAX_ITERATIONS: usize = 15;
+
+    for _iteration in 0..MAX_ITERATIONS {
         let (response, tools_list) = prompt(agent.clone(), history.clone()).await?;
 
         // No tool calls? STOP!!
@@ -255,6 +260,7 @@ pub async fn prompt_with_tools(agent: Agent, mut history: Vec<Message>) -> Resul
         history.push(Message {
             role: ASSISTANT,
             content: Some(response.clone()),
+            multi_content: None,
             tool_calls: Some(calls.clone()),
             tool_call_id: None,
             name: None,
@@ -277,6 +283,7 @@ pub async fn prompt_with_tools(agent: Agent, mut history: Vec<Message>) -> Resul
             history.push(Message {
                 role: crate::api::dtos::Role::TOOL,
                 content: Some(result),
+                multi_content: None,
                 tool_calls: None,
                 tool_call_id: Some(call.id.clone()),
                 name: Some(tool_name.clone()),
@@ -290,6 +297,11 @@ pub async fn prompt_with_tools(agent: Agent, mut history: Vec<Message>) -> Resul
             return Ok(response);
         }
     }
+
+    Err(anyhow::anyhow!(
+        "Max iterations ({}) reached",
+        MAX_ITERATIONS
+    ))
 }
 
 /// High-level streaming with automatic tool execution.
@@ -321,6 +333,7 @@ pub async fn prompt_with_tools_stream(
         history.push(Message {
             role: ASSISTANT,
             content: Some(response.clone()),
+            multi_content: None,
             tool_calls: Some(calls.clone()),
             tool_call_id: None,
             name: None,
@@ -344,6 +357,7 @@ pub async fn prompt_with_tools_stream(
             history.push(Message {
                 role: crate::api::dtos::Role::TOOL,
                 content: Some(result),
+                multi_content: None,
                 tool_calls: None,
                 tool_call_id: Some(call.id.clone()),
                 name: Some(tool_name.clone()),
