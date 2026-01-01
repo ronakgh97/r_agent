@@ -19,7 +19,7 @@ pub async fn run_ascii_art() {
     println!(" Total Sessions: {}\n", total_sessions.to_string().cyan());
     println!(
         " Github: {}\n",
-        "https://github.com/ronakg/r-agent".to_string().cyan()
+        "https://github.com/ronakgh97/r-agent".to_string().cyan()
     );
 }
 

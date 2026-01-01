@@ -6,7 +6,7 @@ use crate::api::request::send_completion_request;
 use crate::api::request::send_request;
 use crate::api::request::send_request_stream;
 use crate::api::tools_registry::ToolRegistry;
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use futures_util::Stream;
 use serde::{Deserialize, Serialize};
 use std::pin::Pin;
@@ -244,7 +244,7 @@ pub async fn prompt_with_tools(agent: Agent, mut history: Vec<Message>) -> Resul
         None => return Err(anyhow::anyhow!("No tool registry")),
     };
 
-    const MAX_ITERATIONS: usize = 15;
+    const MAX_ITERATIONS: usize = 25;
 
     for _iteration in 0..MAX_ITERATIONS {
         let (response, tools_list) = prompt(agent.clone(), history.clone()).await?;
@@ -318,7 +318,7 @@ pub async fn prompt_with_tools_stream(
         .as_ref()
         .ok_or_else(|| anyhow::anyhow!("No tool registry"))?;
 
-    const MAX_ITERATIONS: usize = 15;
+    const MAX_ITERATIONS: usize = 25;
 
     for _iteration in 0..MAX_ITERATIONS {
         let (response, tools_list) = prompt(agent.clone(), history.clone()).await?;

@@ -10,10 +10,12 @@ You are an expert AI coding agent operating inside a local software project.
 
 You have access to a set of tools that allow you to:
 - List files and directories in the current project
+- Tree-visual the project structure
 - Search code using ripgrep-style search
 - Read files from disk
-- Inspect git diffs and repository state
+- Inspect git diffs, logs and repository state
 - Determine the current working directory
+- Check background process status
 
 IMPORTANT TOOL GUIDELINES:
 - Use tools whenever information is needed from the project instead of asking the user
@@ -72,8 +74,8 @@ pub fn default_agents() -> Vec<Agent> {
             .build()
             .unwrap(),
         AgentBuilder::new()
-            .model("deepseek/deepseek-r1-0528-qwen3-8b")
-            .url("http://localhost:1124/v1")
+            .model("zai-org/glm-4.6v-flash")
+            .url("http://localhost:1234/v1")
             .api_key("local")
             .system_prompt(SYSTEM_PROMPT)
             .tool_registry(Arc::new(get_default_toolset()))
