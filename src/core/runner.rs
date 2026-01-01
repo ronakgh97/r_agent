@@ -2,9 +2,11 @@ use crate::core::session::MappedMessage;
 use crate::core::session::Session;
 use crate::core::tools::get_default_toolset;
 use anyhow::Result;
-use my_lib::api::agents::{Agent, AgentBuilder, prompt_with_tools_stream};
-use my_lib::api::dtos::{ImageUrl, Message};
-use my_lib::api::request::log_typewriter_effect;
+use forge::api::agents::{Agent, AgentBuilder, prompt_with_tools_stream};
+use forge::api::dtos::MultiContent;
+use forge::api::dtos::Role::{ASSISTANT, USER};
+use forge::api::dtos::{ImageUrl, Message};
+use forge::api::request::log_typewriter_effect;
 use std::sync::Arc;
 
 #[derive(Clone)]
@@ -50,15 +52,15 @@ impl RunnerContext {
         let history: Vec<Message> = match &self.image_encoded {
             Some(encodings) => {
                 vec![Message {
-                    role: my_lib::api::dtos::Role::USER,
+                    role: USER,
                     content: None,
                     multi_content: Some(vec![
-                        my_lib::api::dtos::MultiContent {
+                        MultiContent {
                             r#type: "text".to_string(),
                             text: Some(user_prompt),
                             image_url: None,
                         },
-                        my_lib::api::dtos::MultiContent {
+                        MultiContent {
                             r#type: "image_url".to_string(),
                             text: None,
                             image_url: Some(ImageUrl {
@@ -73,7 +75,7 @@ impl RunnerContext {
             }
             None => {
                 vec![Message {
-                    role: my_lib::api::dtos::Role::USER,
+                    role: USER,
                     content: Some(user_prompt),
                     multi_content: None,
                     tool_calls: None,
@@ -103,15 +105,15 @@ impl RunnerContext {
         let mut history: Vec<Message> = match &self.image_encoded {
             Some(encodings) => {
                 vec![Message {
-                    role: my_lib::api::dtos::Role::USER,
+                    role: USER,
                     content: None,
                     multi_content: Some(vec![
-                        my_lib::api::dtos::MultiContent {
+                        MultiContent {
                             r#type: "text".to_string(),
                             text: Some(user_prompt),
                             image_url: None,
                         },
-                        my_lib::api::dtos::MultiContent {
+                        MultiContent {
                             r#type: "image_url".to_string(),
                             text: None,
                             image_url: Some(ImageUrl {
@@ -126,7 +128,7 @@ impl RunnerContext {
             }
             None => {
                 vec![Message {
-                    role: my_lib::api::dtos::Role::USER,
+                    role: USER,
                     content: Some(user_prompt),
                     multi_content: None,
                     tool_calls: None,
@@ -140,7 +142,7 @@ impl RunnerContext {
 
         let stream_to_str = log_typewriter_effect(120, stream).await?;
         let agent_message = Message {
-            role: my_lib::api::dtos::Role::ASSISTANT,
+            role: ASSISTANT,
             content: Some(stream_to_str),
             multi_content: None,
             tool_calls: None,
@@ -161,7 +163,7 @@ impl RunnerContext {
 #[allow(unused)]
 pub fn map_message_to(message: &Message) -> MappedMessage {
     match message.role {
-        my_lib::api::dtos::Role::USER => {
+        USER => {
             if let Some(ref content) = message.content {
                 MappedMessage::User(content.clone())
             } else {
@@ -169,7 +171,7 @@ pub fn map_message_to(message: &Message) -> MappedMessage {
                 MappedMessage::User(String::new())
             }
         }
-        my_lib::api::dtos::Role::ASSISTANT => {
+        ASSISTANT => {
             if let Some(ref content) = message.content {
                 MappedMessage::Agent(content.clone())
             } else {
@@ -187,7 +189,7 @@ pub fn map_message_to(message: &Message) -> MappedMessage {
 pub fn map_message_from(message: &MappedMessage) -> Message {
     match message {
         MappedMessage::User(content) => Message {
-            role: my_lib::api::dtos::Role::USER,
+            role: forge::api::dtos::Role::USER,
             content: Some(content.clone()),
             multi_content: None,
             tool_calls: None,
@@ -195,7 +197,7 @@ pub fn map_message_from(message: &MappedMessage) -> Message {
             name: None,
         },
         MappedMessage::Agent(content) => Message {
-            role: my_lib::api::dtos::Role::ASSISTANT,
+            role: forge::api::dtos::Role::ASSISTANT,
             content: Some(content.clone()),
             multi_content: None,
             tool_calls: None,

@@ -1,6 +1,6 @@
 use crate::core::tools::get_default_toolset;
 use anyhow::{Context, Result};
-use my_lib::api::agents::{Agent, AgentBuilder};
+use forge::api::agents::{Agent, AgentBuilder};
 use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::fs;

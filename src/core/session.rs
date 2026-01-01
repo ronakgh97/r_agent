@@ -1,5 +1,5 @@
 use anyhow::Result;
-use my_lib::api::dtos::Message;
+use forge::api::dtos::Message;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use tokio::fs;
