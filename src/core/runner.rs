@@ -85,7 +85,7 @@ impl RunnerContext {
             }
         };
 
-        let stream = prompt_with_tools_stream(self.agent_config.clone(), history.clone()).await?;
+        let stream = prompt_with_tools_stream(self.agent_config.clone(), history.clone(), 25).await?;
 
         let _ = log_typewriter_effect(120, stream).await?;
 
@@ -138,7 +138,7 @@ impl RunnerContext {
             }
         };
 
-        let stream = prompt_with_tools_stream(self.agent_config.clone(), history.clone()).await?;
+        let stream = prompt_with_tools_stream(self.agent_config.clone(), history.clone(), 25).await?;
 
         let stream_to_str = log_typewriter_effect(120, stream).await?;
         let agent_message = Message {

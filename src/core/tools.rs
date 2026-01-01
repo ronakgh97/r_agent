@@ -1,6 +1,6 @@
 use anyhow::{Result, anyhow};
 use colored::Colorize;
-use my_lib::api::tools_registry::{Tool, ToolRegistry};
+use forge::api::tools_registry::{Tool, ToolRegistry};
 use serde_json::Value;
 use std::env;
 use std::process::Stdio;
@@ -20,6 +20,7 @@ pub fn get_default_toolset() -> ToolRegistry {
     registry.register(GitLogTool);
     registry.register(PsTool);
     registry.register(TreeTool);
+    registry.register(SafeCurlTool);
     registry
 }
 
@@ -568,6 +569,63 @@ impl Tool for GitLogTool {
             Ok(result)
         } else {
             let err_msg = String::from_utf8_lossy(&output.stderr).to_string();
+            Ok(err_msg)
+        }
+    }
+}
+
+pub struct SafeCurlTool;
+
+#[async_trait::async_trait]
+impl Tool for SafeCurlTool {
+    fn name(&self) -> &str {
+        "safe_curl_tool"
+    }
+
+    fn description(&self) -> Value {
+        serde_json::json!({
+            "type": "function",
+            "function": {
+                "name": self.name(),
+                "description": "Performs a safe HTTP GET request to the specified URL and returns the response body. Use this tool to fetch data from web APIs or websites.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "description": "The URL to fetch data from"
+                        }
+                    },
+                    "required": ["url"]
+                }
+            }
+        })
+    }
+
+    fn tool_callback(&self) -> bool {
+        true
+    }
+
+    async fn execute_tool(&self, args: Value) -> Result<String> {
+        let url = args["url"]
+            .as_str()
+            .ok_or_else(|| anyhow!("missing 'url' parameter"))?;
+
+        let response = reqwest::get(url).await?;
+
+        if response.status().is_success() {
+            let body = response.text().await?;
+            println!(
+                "{}",
+                format!(
+                    "[DEBUG] SafeCurlTool executed\nFetching URL: {}\n[Returning] \n{}\n",
+                    url, body
+                )
+                .dimmed()
+            );
+            Ok(body)
+        } else {
+            let err_msg = format!("Failed to fetch URL: HTTP {}", response.status());
             Ok(err_msg)
         }
     }
