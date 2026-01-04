@@ -13,9 +13,9 @@ pub async fn run_ascii_art() {
     "#;
 
     println!("{}\n", ascii_art.to_string().magenta());
-    let total_configs = get_total_configs().unwrap_or_else(|_| 0);
+    let total_configs = get_total_configs().unwrap_or(0);
     println!(" Total Configs: {}\n", total_configs.to_string().cyan());
-    let total_sessions = get_total_sessions().unwrap_or_else(|_| 0);
+    let total_sessions = get_total_sessions().unwrap_or(0);
     println!(" Total Sessions: {}\n", total_sessions.to_string().cyan());
     println!(
         " Github: {}\n",

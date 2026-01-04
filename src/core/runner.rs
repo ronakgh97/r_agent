@@ -26,7 +26,7 @@ impl RunnerContext {
         context: &Option<String>,
         image_encoded: &Option<String>,
     ) -> Result<Self> {
-        let agent_builder: AgentBuilder = toml::from_str(&agent_config)?;
+        let agent_builder: AgentBuilder = toml::from_str(agent_config)?;
         let agent_config = agent_builder
             .tool_registry(Arc::new(get_default_toolset()))
             .build()?;
@@ -85,7 +85,8 @@ impl RunnerContext {
             }
         };
 
-        let stream = prompt_with_tools_stream(self.agent_config.clone(), history.clone(), 25).await?;
+        let stream =
+            prompt_with_tools_stream(self.agent_config.clone(), history.clone(), 25).await?;
 
         let _ = log_typewriter_effect(120, stream).await?;
 
@@ -138,7 +139,8 @@ impl RunnerContext {
             }
         };
 
-        let stream = prompt_with_tools_stream(self.agent_config.clone(), history.clone(), 25).await?;
+        let stream =
+            prompt_with_tools_stream(self.agent_config.clone(), history.clone(), 25).await?;
 
         let stream_to_str = log_typewriter_effect(120, stream).await?;
         let agent_message = Message {

@@ -72,11 +72,7 @@ pub async fn run_agent(
         None
     };
 
-    let context = if let Some(context_name) = context {
-        Some(context_name.clone())
-    } else {
-        None
-    };
+    let context = context.clone();
 
     // Encoded the image
     let image = if let Some(image_path) = image {

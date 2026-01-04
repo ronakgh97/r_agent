@@ -19,7 +19,7 @@ pub fn get_default_toolset() -> ToolRegistry {
     registry.register(GitStatusTool);
     registry.register(GitLogTool);
     registry.register(PsTool);
-    registry.register(TreeTool);
+    // registry.register(TreeTool);
     registry.register(SafeCurlTool);
     registry
 }
@@ -232,7 +232,7 @@ impl Tool for ReadFileTool {
         #[cfg(target_os = "windows")]
         let mut cmd = {
             let mut c = Command::new("cmd");
-            c.arg("/C").arg("type").arg(&path);
+            c.arg("/C").arg("type").arg(path);
             c
         };
         #[cfg(not(target_os = "windows"))]
