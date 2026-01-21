@@ -8,6 +8,8 @@ moved to its own repository [forge](https://github.com/ronakgh97/forge) to allow
 
 - Demonstrates the integration of `forge` in a real-world application.
 - Supports piping, regex, and all traditional Unix operations to maintain an old-school, not modern slop.
+- All tools are read-only, so they are safe to use without the risk of modifying files.
+  `Personally I dont like AI editing/messing with files, But read-only Agents are cool! 😊`
 
 ## Command-Line Arguments
 
