@@ -19,6 +19,7 @@ pub fn get_default_toolset() -> ToolRegistry {
     registry.register(GitStatusTool);
     registry.register(GitLogTool);
     registry.register(PsTool);
+    registry.register(CargoCheckTool);
     // registry.register(TreeTool);
     registry.register(SafeCurlTool);
     registry
@@ -628,6 +629,64 @@ impl Tool for SafeCurlTool {
             let err_msg = format!("Failed to fetch URL: HTTP {}", response.status());
             Ok(err_msg)
         }
+    }
+}
+
+/// A tool to run 'cargo check' in the current Rust project directory
+pub struct CargoCheckTool;
+
+#[async_trait::async_trait]
+impl Tool for CargoCheckTool {
+    fn name(&self) -> &str {
+        "cargo_check_tool"
+    }
+
+    fn description(&self) -> Value {
+        serde_json::json!({
+            "type": "function",
+            "function": {
+                "name": self.name(),
+                "description": "Runs 'cargo check' in the current Rust project directory and returns the output. Use this tool to verify that your Rust code compiles without errors.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {},
+                    "required": []
+                }
+            }
+        })
+    }
+
+    fn tool_callback(&self) -> bool {
+        true
+    }
+
+    async fn execute_tool(&self, _args: Value) -> Result<String> {
+        let output = Command::new("cargo").arg("check").output().await?;
+
+        if output.status.success() {
+            let result = String::from_utf8_lossy(&output.stderr).to_string();
+            println!(
+                "{}",
+                format!(
+                    "[DEBUG] CargoCheckTool executed\n[Returning] \n{}\n",
+                    result
+                )
+                .dimmed()
+            );
+            Ok(result)
+        } else {
+            let err_msg = String::from_utf8_lossy(&output.stderr).to_string();
+            println!(
+                "{}",
+                format!(
+                    "[DEBUG] CargoCheckTool executed (with errors)\n[Returning] \n{}\n",
+                    err_msg
+                )
+                    .dimmed()
+            );
+            Ok(err_msg)
+        }
+
     }
 }
 
